@@ -102,7 +102,7 @@ class Printable::User
 		end
 
 		# Scan the text for any server errors
-		text.scan(/<div class=error ><img.*?>(.*?)<.div>/im) do|error, x|
+		text.scan(/<div class=error ><img.*?>(.*?)<.div>/im) do|error|
 			errors.push(coder.decode(error))
 		end
 
