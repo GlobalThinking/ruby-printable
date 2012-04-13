@@ -34,6 +34,28 @@ class Printable::User
 	end
 
 	# =====================================================
+	# POST to the login form and authenticate the user
+	# =====================================================
+	def login(info)
+		# POST to login form
+		res = self._post(
+			self.uri_login,
+			self.map_fields(self.uri_login, info).merge({"__EVENTTARGET" => "ctl00$content$Login$btnLogin"}),
+			{"Cookie" => "Printable_CookieCheck=1"}
+		)
+
+		# Check for errors
+		case res
+		when Net::HTTPRedirection
+			# Parse the 'set-cookie' header
+			@session_key, @session_id = res['set-cookie'].split(';')[0].split('=')
+			return {:session_key => @session_key, :session_id => @session_id}
+		else
+			raise self.parse_errors(res.body).join("\n")
+		end
+	end
+
+	# =====================================================
 	# Map the form fields located at a particular URI
 	# =====================================================
 	def map_fields(uri, info)
@@ -71,6 +93,11 @@ class Printable::User
 
 		# Scan the text for any field errors
 		text.scan(/<font.*?>(.*?is +(a +)?required.*?)<.font>/im) do|error, x|
+			errors.push(coder.decode(error))
+		end
+
+		# Scan the text for any login errors
+		text.scan(/<span id=".*?_Login_txtMessage">(.+?)<.span>/) do|error|
 			errors.push(coder.decode(error))
 		end
 
