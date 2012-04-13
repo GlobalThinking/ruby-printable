@@ -22,8 +22,15 @@ class PrintableTest < Test::Unit::TestCase
 
     assert_nothing_raised do
       user.login({
-        "email" => "fstrube@globalthinking.com",
+        "loginid" => "fstrube@globalthinking.com",
         "password" => "global1968"
+      })
+    end
+
+    assert_raise RuntimeError do
+      puts user.login({
+        "loginid" => "fstrube@globalthinking.com",
+        "password" => "global"
       })
     end
   end
